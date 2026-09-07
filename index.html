@@ -29,9 +29,34 @@
 
   <iframe 
     src="https://script.google.com/macros/s/AKfycbwe-hpFTspCUdFyzc5F4n4Vg7QiI-HWeB1SZBfMValmazfnTVb1d1HcmvaT_sFq26cB8A/exec" 
-    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox"
     frameborder="0" allow="geolocation">
   </iframe>
+  <script>
+    // Listen for messages from the iframe
+    window.addEventListener('message', function(event) {
+      // Check if the message is from your app
+      if (event.data && event.data.type === 'download') {
+        // Redirect the main window to the download link
+        window.top.location.href = event.data.url;
+      }
+    });
+
+    // Alternative: Force all links to open in top window
+    document.getElementById('appFrame').addEventListener('load', function() {
+      try {
+        var iframeDoc = this.contentDocument || this.contentWindow.document;
+        var links = iframeDoc.querySelectorAll('a[href*="download"], a[href*="play.google"], a[href*="apps.apple"]');
+        links.forEach(function(link) {
+          link.target = '_top';
+          link.rel = 'noopener noreferrer';
+        });
+      } catch(e) {
+        // Cross-origin error - this is normal, the message listener will handle it
+        console.log('Cross-origin iframe, using message listener');
+      }
+    });
+  </script>
 
 </body>
 </html>
